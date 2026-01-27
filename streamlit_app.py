@@ -1,8 +1,8 @@
 import streamlit as st
 
 # Pages
-lab1 = st.Page("Lab1.py", title= "Lab 1", icon = ":material/description:")
-lab2 = st.Page("Lab2.py", title= "Lab 2", icon = ":material/summarize:", default= True)
+lab1 = st.Page("Labs/Lab1.py", title= "Lab 1", icon = ":material/description:")
+lab2 = st.Page("Labs/Lab2.py", title= "Lab 2", icon = ":material/summarize:", default= True)
 
 # Navigation
 pg = st.navigation([lab1, lab2])
