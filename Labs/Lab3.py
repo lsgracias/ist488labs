@@ -4,14 +4,12 @@ from openai import OpenAI
 st.title("🤖 Lab 3 - Chatbot with Memory")
 st.write("A friendly chatbot that explains things so a 10-year-old can understand!")
 
-# Get API key from secrets
 openai_api_key = st.secrets.get("OPENAI_API_KEY")
 
 if not openai_api_key:
     st.error("OpenAI API key not found. Please add OPENAI_API_KEY to your secrets.toml file.")
     st.stop()
 
-# Initialize OpenAI client
 client = OpenAI(api_key=openai_api_key)
 
 # Configuration
