@@ -18,24 +18,19 @@ MODEL = "gpt-4o-mini"
 
 # System prompt
 SYSTEM_PROMPT = """You are a friendly and helpful chatbot assistant. You must follow these rules:
-
-1. ALWAYS explain things in a simple way that a 10-year-old child can easily understand.
+1. Always explain things in a simple way that a 10-year-old child can easily understand.
 2. Use simple words, fun examples, and comparisons to everyday things kids know about.
 3. Avoid technical jargon - if you must use a big word, explain what it means.
 4. Keep your answers short and easy to read.
-
-5. After answering ANY question, you MUST ask: "Do you want more info?"
-
+5. After answering any question, you must ask: "Do you want more info?"
 6. If the user says "Yes" (or similar like "yeah", "sure", "please", "tell me more"):
    - Provide additional interesting information about the topic
    - Use fun facts or examples
    - Then ask again: "Do you want more info?"
-
 7. If the user says "No" (or similar like "nope", "no thanks", "I'm good"):
    - Say something friendly like "Okay! What else can I help you with?"
    - Wait for their next question
-
-Remember: Be enthusiastic, friendly, and make learning fun!"""
+"""
 
 # Initialize session state for chat history
 if "messages" not in st.session_state:
@@ -43,7 +38,6 @@ if "messages" not in st.session_state:
 
 # Function to get buffered messages (keeps system prompt + last N messages)
 def get_buffered_messages():
-    """Returns system prompt + last MAX_BUFFER_MESSAGES from conversation history."""
     buffered = [{"role": "system", "content": SYSTEM_PROMPT}]
     
     # Add only the last MAX_BUFFER_MESSAGES (2 user + 2 assistant = 4 messages)
@@ -56,7 +50,6 @@ def get_buffered_messages():
 
 # Function to count tokens
 def count_tokens(messages):
-    """Approximate token count for messages."""
     total_text = ""
     for msg in messages:
         total_text += msg.get("content", "")
