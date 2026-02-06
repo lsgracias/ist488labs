@@ -13,7 +13,7 @@ if not openai_api_key:
 client = OpenAI(api_key=openai_api_key)
 
 # Configuration
-MAX_BUFFER_MESSAGES = 4  # Last 2 user messages + 2 assistant responses
+MAX_BUFFER_MESSAGES = 8  
 MODEL = "gpt-4o-mini"
 
 # System prompt
@@ -40,7 +40,7 @@ if "messages" not in st.session_state:
 def get_buffered_messages():
     buffered = [{"role": "system", "content": SYSTEM_PROMPT}]
     
-    # Add only the last MAX_BUFFER_MESSAGES (2 user + 2 assistant = 4 messages)
+    # Add only the last MAX_BUFFER_MESSAGES 
     if len(st.session_state.messages) > MAX_BUFFER_MESSAGES:
         buffered.extend(st.session_state.messages[-MAX_BUFFER_MESSAGES:])
     else:
