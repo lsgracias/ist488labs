@@ -7,7 +7,7 @@ lab3 = st.Page("Labs/Lab3.py", title= "Lab 3 - Chatbot", icon = ":material/descr
 lab4 = st.Page("Labs/Lab4.py", title= "Lab 4 - RAG Chatbot", icon = ":material/description:", default= True)
 
 # Navigation
-pg = st.navigation([lab1, lab2, lab3])
+pg = st.navigation([lab1, lab2, lab3, lab4])
 
 # Configuration
 st.set_page_config(page_title="IST 488 Labs", page_icon=":material/school:")
