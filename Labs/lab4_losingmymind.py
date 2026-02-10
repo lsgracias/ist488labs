@@ -84,7 +84,7 @@ def load_pdfs_to_collection(folder_path, collection):
 # Check if collection is empty and load PDFs
 if collection.count() == 0:
     with st.spinner("Loading PDFs into ChromaDB..."):
-        loaded = load_pdfs_to_collection('./Lab-04-Data/', collection)
+        loaded = load_pdfs_to_collection('./lab4pdfs', collection)
         st.success(f"✅ Loaded {loaded} PDF documents into ChromaDB")
 
 #### MAIN APP ####
