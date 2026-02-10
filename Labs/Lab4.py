@@ -157,7 +157,7 @@ if "lab4_messages" not in st.session_state:
     st.session_state.lab4_messages = []
 
 # --- Sidebar Info ---
-st.sidebar.header("📊 RAG Info")
+st.sidebar.header("RAG Info")
 st.sidebar.write(f"**Embedding Model:** {EMBEDDING_MODEL}")
 st.sidebar.write(f"**LLM Model:** {LLM_MODEL}")
 st.sidebar.write(f"**Collection:** {COLLECTION_NAME}")
