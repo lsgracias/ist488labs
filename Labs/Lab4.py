@@ -13,6 +13,7 @@ st.title("📚 Lab 4 - RAG Course Information Chatbot")
 st.write("""
 This chatbot uses **RAG (Retrieval-Augmented Generation)** to answer questions about course syllabi.
 It searches through course PDF documents and provides answers based on the relevant content found.
+Courses: IST 195, IST 256, IST 314, IST 343, IST 387, IST 418, IST 488
 """)
 
 # Get API key from secrets
