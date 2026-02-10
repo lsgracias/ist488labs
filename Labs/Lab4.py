@@ -31,6 +31,7 @@ COLLECTION_NAME = "Lab4Collection"
 EMBEDDING_MODEL = "text-embedding-3-small"
 LLM_MODEL = "gpt-4o-mini"
 PDF_FOLDER = "lab4pdfs"
+MAX_CHAT_HISTORY = 8 
 
 # Function to extract text from PDF
 def extract_text_from_pdf(pdf_path):
@@ -54,7 +55,7 @@ def create_vector_db():
     )
     
     # Create ChromaDB client
-    chroma_client = chromadb.Client()
+    chroma_client = chromadb.PersistentClient()
     
     # Create or get collection
     collection = chroma_client.get_or_create_collection(
