@@ -136,14 +136,6 @@ st.sidebar.header("RAG Info")
 st.sidebar.write(f"**Embedding Model:** text-embedding-3-small")
 st.sidebar.write(f"**LLM Model:** gpt-4o-mini")
 
-# Show loaded documents
-if st.session_state.Lab4_VectorDB:
-    try:
-        count = st.session_state.Lab4_VectorDB.count()
-        st.sidebar.write(f"**Documents loaded:** {count}")
-    except:
-        st.sidebar.write("**Documents loaded:** 0")
-
 st.sidebar.divider()
 
 # Clear chat button
@@ -187,12 +179,12 @@ if prompt := st.chat_input("Ask a question about the courses..."):
                     context_text += f"\n\n--- Document Snippet {i+1} (Source: {filename}) ---\n{doc}"
                     retrieved_docs.append(filename)
 
-    system_prompt = f"""You are a helpful course information assistant. You answer questions based on the course syllabus documents provided.
+    system_prompt = f"""You are a helpful course information assistant.
 IMPORTANT RULES:
 1. If you find relevant information, clearly state which course/document it comes from.
-2. If the answer is not in the provided documents, say "I couldn't find that information in the course documents."
-3. Be helpful, clear, and concise.
-4. When using information from the documents, mention that you found it in the course materials.
+2. Be helpful, clear, and concise.
+3. When using information from the context, mention that you found it in the course materials.
+4. If the answer to the question isn't provided in the context, use your general knowledge but state that this wasn't from the course material.
 
 Here are the relevant course documents:
 {context_text}
