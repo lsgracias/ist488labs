@@ -26,127 +26,101 @@ if not openai_api_key:
 # Initialize OpenAI client
 client = OpenAI(api_key=openai_api_key)
 
-# Configuration
-COLLECTION_NAME = "Lab4Collection"
-EMBEDDING_MODEL = "text-embedding-3-small"
-LLM_MODEL = "gpt-4o-mini"
-PDF_FOLDER = "lab4pdfs"
-MAX_CHAT_HISTORY = 8 
-
-# Function to extract text from PDF
-def extract_text_from_pdf(pdf_path):
-    try:
-        with open(pdf_path, 'rb') as file:
-            pdf_reader = PyPDF2.PdfReader(file)
-            text = ""
-            for page in pdf_reader.pages:
-                text += page.extract_text() or ""
-            return text.strip()
-    except Exception as e:
-        st.error(f"Error reading {pdf_path}: {e}")
-        return ""
+# Helper function for chunking text
+def chunk_text(text, chunk_size=1000, overlap=200):
+    chunks = []
+    start = 0
+    while start < len(text):
+        end = start + chunk_size
+        chunks.append(text[start:end])
+        start += (chunk_size - overlap)
+    return chunks
 
 # Function to create ChromaDB collection
 def create_vector_db():
-    # Create OpenAI embedding function
-    openai_ef = embedding_functions.OpenAIEmbeddingFunction(
-        api_key=openai_api_key,
-        model_name=EMBEDDING_MODEL
-    )
+    pdf_dir = "./lab4pdfs"
     
-    # Create ChromaDB client
-    chroma_client = chromadb.PersistentClient()
-    
-    # Create or get collection
-    collection = chroma_client.get_or_create_collection(
-        name=COLLECTION_NAME,
-        embedding_function=openai_ef
-    )
-    
-    # Check if PDFs folder exists
-    if not os.path.exists(PDF_FOLDER):
-        st.warning(f"PDF folder '{PDF_FOLDER}' not found. Please create it and add PDF files.")
-        return collection
-    
-    # Get all PDF files
-    pdf_files = [f for f in os.listdir(PDF_FOLDER) if f.endswith('.pdf')]
+    # Check if directory exists
+    if not os.path.exists(pdf_dir):
+        st.error(f"Directory {pdf_dir} not found.")
+        return None
+
+    # Retrieve all PDF files
+    pdf_files = [f for f in os.listdir(pdf_dir) if f.endswith('.pdf')]
     
     if not pdf_files:
-        st.warning(f"No PDF files found in '{PDF_FOLDER}' folder.")
-        return collection
+        st.error(f"No PDF files found in {pdf_dir}.")
+        return None
+        
+    # Initialize ChromaDB client
+    chroma_client = chromadb.Client()
     
-    # Process each PDF
+    # Create or get collection
+    # We use a new name to force a fresh start if the code changes
+    collection_name = "Lab4Collection_v2" 
+    
+    try:
+        # Try to delete if it exists to ensure freshness (optional, but good for dev)
+        chroma_client.delete_collection(name=collection_name)
+    except:
+        pass
+
+    collection = chroma_client.create_collection(name=collection_name)
+    
     documents = []
     metadatas = []
     ids = []
+
+    id_counter = 0
     
-    for pdf_file in pdf_files:
-        pdf_path = os.path.join(PDF_FOLDER, pdf_file)
-        text = extract_text_from_pdf(pdf_path)
-        
-        if text:
-            documents.append(text)
-            metadatas.append({"filename": pdf_file, "source": pdf_path})
-            ids.append(pdf_file)  # Use filename as unique ID
+    # Process each PDF
+    for filename in pdf_files:
+        file_path = os.path.join(pdf_dir, filename)
+        try:
+            with open(file_path, 'rb') as f:
+                reader = PyPDF2.PdfReader(f)
+                full_text = ""
+                for page in reader.pages:
+                    full_text += page.extract_text()
+                
+                # Chunk the text
+                chunks = chunk_text(full_text, chunk_size=1000, overlap=200)
+                
+                for i, chunk in enumerate(chunks):
+                    documents.append(chunk)
+                    ids.append(f"{filename}_chunk_{i}") # Unique ID per chunk
+                    metadatas.append({"filename": filename, "chunk_id": i})
+                    
+        except Exception as e:
+            st.error(f"Error reading {filename}: {e}")
+
+    # Generate embeddings using batches to avoid API limits
+    embeddings = []
+    batch_size = 100
     
-    # Add documents to collection
-    if documents:
-        collection.add(
-            documents=documents,
-            metadatas=metadatas,
-            ids=ids
-        )
-        st.sidebar.success(f"✅ Loaded {len(documents)} PDF documents")
+    progress_bar = st.progress(0, text="Generating embeddings...")
+    
+    for i in range(0, len(documents), batch_size):
+        batch_docs = documents[i : i + batch_size]
+        try:
+            response = client.embeddings.create(input=batch_docs, model="text-embedding-3-small")
+            batch_embeddings = [data.embedding for data in response.data]
+            embeddings.extend(batch_embeddings)
+            progress_bar.progress((i + len(batch_docs)) / len(documents), text=f"Generated {i + len(batch_docs)}/{len(documents)} embeddings")
+        except Exception as e:
+            st.error(f"Error generating embeddings for batch {i}: {e}")
+            return None # Stop if embedding fails
+            
+    progress_bar.empty()
+
+    collection.add(
+        documents=documents,
+        embeddings=embeddings,
+        metadatas=metadatas,
+        ids=ids
+    )
     
     return collection
-
-# Function to query vector database
-def query_vector_db(collection, query, n_results=3):
-    results = collection.query(
-        query_texts=[query],
-        n_results=n_results
-    )
-    return results
-
-# Function to format context from query results
-def format_context(results):
-    context = ""
-    if results and results['documents'] and results['documents'][0]:
-        for i, (doc, metadata) in enumerate(zip(results['documents'][0], results['metadatas'][0])):
-            filename = metadata.get('filename', 'Unknown')
-            # Truncate document to avoid token limits
-            doc_truncated = doc[:3000] if len(doc) > 3000 else doc
-            context += f"\n\n--- Document {i+1}: {filename} ---\n{doc_truncated}"
-    return context
-
-# Function to get LLM response
-def get_llm_response(query, context, chat_history):
-    system_prompt = f"""You are a helpful course information assistant. You answer questions based on the course syllabus documents provided.
-IMPORTANT RULES:
-1. Answer questions using ONLY the information from the provided course documents.
-2. If you find relevant information, clearly state which course/document it comes from.
-3. If the answer is not in the provided documents, say "I couldn't find that information in the course documents."
-4. Be helpful, clear, and concise.
-5. When using information from the documents, mention that you found it in the course materials.
-
-Here are the relevant course documents:
-{context}
-"""
-    messages = [{"role": "system", "content": system_prompt}]
-    
-    # Add chat history (last 8 messages)
-    for msg in chat_history[-8:]:
-        messages.append({"role": msg["role"], "content": msg["content"]})
-    
-    # Add current query
-    messages.append({"role": "user", "content": query})
-    
-    stream = client.chat.completions.create(
-        model=LLM_MODEL,
-        messages=messages,
-        stream=True,
-    )
-    return stream
 
 # --- Initialize Vector Database ---
 if "Lab4_VectorDB" not in st.session_state:
@@ -159,9 +133,8 @@ if "lab4_messages" not in st.session_state:
 
 # --- Sidebar Info ---
 st.sidebar.header("RAG Info")
-st.sidebar.write(f"**Embedding Model:** {EMBEDDING_MODEL}")
-st.sidebar.write(f"**LLM Model:** {LLM_MODEL}")
-st.sidebar.write(f"**Collection:** {COLLECTION_NAME}")
+st.sidebar.write(f"**Embedding Model:** text-embedding-3-small")
+st.sidebar.write(f"**LLM Model:** gpt-4o-mini")
 
 # Show loaded documents
 if st.session_state.Lab4_VectorDB:
@@ -174,7 +147,7 @@ if st.session_state.Lab4_VectorDB:
 st.sidebar.divider()
 
 # Clear chat button
-if st.sidebar.button("🗑️ Clear Chat"):
+if st.sidebar.button("Clear Chat"):
     st.session_state.lab4_messages = []
     st.rerun()
 
@@ -194,25 +167,49 @@ if prompt := st.chat_input("Ask a question about the courses..."):
     with st.chat_message("user"):
         st.markdown(prompt)
     
-    # Query vector database for relevant documents
-    with st.spinner("Searching course documents..."):
-        results = query_vector_db(st.session_state.Lab4_VectorDB, prompt, n_results=3)
-        context = format_context(results)
+    # Retrieve relevant documents
+    context_text = ""
+    retrieved_docs = []
+
+    if st.session_state.Lab4_VectorDB:
+        with st.spinner("Searching course documents..."):
+            query_response = client.embeddings.create(input=prompt, model="text-embedding-3-small")
+            query_embedding = query_response.data[0].embedding
+            
+            results = st.session_state.Lab4_VectorDB.query(
+                query_embeddings=[query_embedding],
+                n_results=5
+            )
+            
+            if results['documents']:
+                for i, doc in enumerate(results['documents'][0]):
+                    filename = results['metadatas'][0][i]['filename']
+                    context_text += f"\n\n--- Document Snippet {i+1} (Source: {filename}) ---\n{doc}"
+                    retrieved_docs.append(filename)
+
+    system_prompt = f"""You are a helpful course information assistant. You answer questions based on the course syllabus documents provided.
+IMPORTANT RULES:
+1. If you find relevant information, clearly state which course/document it comes from.
+2. If the answer is not in the provided documents, say "I couldn't find that information in the course documents."
+3. Be helpful, clear, and concise.
+4. When using information from the documents, mention that you found it in the course materials.
+
+Here are the relevant course documents:
+{context_text}
+"""
+    messages = [{"role": "system", "content": system_prompt}]
     
-    # Show which documents were retrieved (in expander)
-    if results and results['metadatas'] and results['metadatas'][0]:
-        with st.expander("📄 Documents used for this response"):
-            for i, metadata in enumerate(results['metadatas'][0], 1):
-                st.write(f"{i}. {metadata.get('filename', 'Unknown')}")
+    # Add current query
+    messages.append({"role": "user", "content": prompt})
     
     # Generate response
     with st.chat_message("assistant"):
-        if context:
-            stream = get_llm_response(prompt, context, st.session_state.lab4_messages)
-            response = st.write_stream(stream)
-        else:
-            response = "I don't have any course documents loaded. Please make sure PDF files are in the 'pdfs' folder."
-            st.write(response)
+        stream = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=messages,
+            stream=True,
+        )
+        response = st.write_stream(stream)
     
     # Add assistant response to history
     st.session_state.lab4_messages.append({"role": "assistant", "content": response})
