@@ -97,7 +97,7 @@ def get_weather_advice(user_input: str) -> str:
     # If tool was invoked, run it and call the API again
     if tool_calls:
         messages.append(response_msg)  # append assistant's tool-call request
-
+        tool_results = []
         for tc in tool_calls:
             args     = json.loads(tc.function.arguments)
             location = args.get("location", "Syracuse, NY, US")
@@ -120,6 +120,16 @@ def get_weather_advice(user_input: str) -> str:
                     "city":    location,
                     "error":   str(e),
                 })
+
+            tool_results.append({
+                "role":         "tool",
+                "tool_call_id": tc.id,
+                "name":         tc.function.name,
+                "content":      tool_result,
+            })
+
+        messages.extend(tool_results)
+
 
         # Second call: give the model the weather data so it can advise
         final_response = client.chat.completions.create(
