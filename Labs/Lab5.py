@@ -9,7 +9,6 @@ st.write("Enter a city and I'll tell you what to wear and suggest outdoor activi
 
 # Get API key from secrets
 weather_api_key = st.secrets.get("OPENWEATHERMAP_API_KEY")
-
 openai_api_key = st.secrets.get("OPENAI_API_KEY")
 
 if not openai_api_key:
@@ -106,15 +105,21 @@ def get_weather_advice(user_input: str) -> str:
             try:
                 weather_data = get_current_weather(location)
                 tool_result  = json.dumps(weather_data)
+                st.session_state.api_calls.append({
+                    "success":     True,
+                    "city":        location,
+                    "temp":        weather_data["temperature"],
+                    "feels_like":  weather_data["feels_like"],
+                    "description": weather_data["description"],
+                    "humidity":    weather_data["humidity"],
+                })
             except Exception as e:
                 tool_result = json.dumps({"error": str(e)})
-
-            messages.append({
-                "role":         "tool",
-                "tool_call_id": tc.id,
-                "name":         tc.function.name,
-                "content":      tool_result,
-            })
+                st.session_state.api_calls.append({
+                    "success": False,
+                    "city":    location,
+                    "error":   str(e),
+                })
 
         # Second call: give the model the weather data so it can advise
         final_response = client.chat.completions.create(
