@@ -4,7 +4,7 @@ import json
 from openai import OpenAI
 
 st.set_page_config(page_title="What to Wear Bot", page_icon="🌤️")
-st.title("🌤️ What to Wear Bot")
+st.title("🌤️ Fashion Bot")
 st.write("Enter a city and I'll tell you what to wear and suggest outdoor activities!")
 
 # Get API key from secrets
