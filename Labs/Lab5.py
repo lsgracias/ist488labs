@@ -126,13 +126,39 @@ def get_weather_advice(user_input: str) -> str:
     # No tool called – return the model's direct response
     return response_msg.content
 
+# Sidebar 
+if "api_calls" not in st.session_state:
+    st.session_state.api_calls = []
+
+with st.sidebar:
+    st.header("🌐 OpenWeatherMap API Status")
+
+    if st.session_state.api_calls:
+        for i, call in enumerate(reversed(st.session_state.api_calls), 1):
+            with st.expander(f"Call #{len(st.session_state.api_calls) - i + 1} — {call['city']}"):
+                if call["success"]:
+                    st.success("✅ API Called Successfully")
+                    st.write(f"**City:** {call['city']}")
+                    st.write(f"**Temp:** {call['temp']}°F (feels like {call['feels_like']}°F)")
+                    st.write(f"**Conditions:** {call['description'].title()}")
+                    st.write(f"**Humidity:** {call['humidity']}%")
+                else:
+                    st.error(f"❌ API Call Failed")
+                    st.write(f"**City:** {call['city']}")
+                    st.write(f"**Error:** {call['error']}")
+        if st.button("Clear History"):
+            st.session_state.api_calls = []
+            st.rerun()
+    else:
+        st.info("No API calls made yet. Enter a city and click **Get Advice** to begin.")
+
 # Main Interface
 city_input = st.text_input(
     "Enter a city:",
     placeholder="e.g. Syracuse, NY, US  |  Tokyo, Japan  |  Lima, Peru",
 )
 
-if st.button("Get Advice 👗"):
+if st.button("Get Advice"):
     if not city_input.strip():
         query = "What should I wear today? I'm in Syracuse, NY."
     else:
