@@ -4,10 +4,11 @@ import streamlit as st
 lab1 = st.Page("Labs/Lab1.py", title= "Lab 1 - Document Q & A", icon = ":material/description:")
 lab2 = st.Page("Labs/Lab2.py", title= "Lab 2 - Document Summarizer", icon = ":material/description:")
 lab3 = st.Page("Labs/Lab3.py", title= "Lab 3 - Chatbot", icon = ":material/description:")
-lab4 = st.Page("Labs/Lab4.py", title= "Lab 4 - RAG Chatbot", icon = ":material/description:", default= True)
+lab4 = st.Page("Labs/Lab4.py", title= "Lab 4 - RAG Chatbot", icon = ":material/description:")
+lab5 = st.Page("Labs/Lab5.py", title= "Lab 5 - ", icon = ":material/description:", default= True)
 
 # Navigation
-pg = st.navigation([lab1, lab2, lab3, lab4])
+pg = st.navigation([lab1, lab2, lab3, lab4, lab5])
 
 # Configuration
 st.set_page_config(page_title="IST 488 Labs", page_icon=":material/school:")
