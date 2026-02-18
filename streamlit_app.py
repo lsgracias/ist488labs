@@ -5,7 +5,7 @@ lab1 = st.Page("Labs/Lab1.py", title= "Lab 1 - Document Q & A", icon = ":materia
 lab2 = st.Page("Labs/Lab2.py", title= "Lab 2 - Document Summarizer", icon = ":material/description:")
 lab3 = st.Page("Labs/Lab3.py", title= "Lab 3 - Chatbot", icon = ":material/description:")
 lab4 = st.Page("Labs/Lab4.py", title= "Lab 4 - RAG Chatbot", icon = ":material/description:")
-lab5 = st.Page("Labs/Lab5.py", title= "Lab 5 - ", icon = ":material/description:", default= True)
+lab5 = st.Page("Labs/Lab5.py", title= "Lab 5 - Fashion Bot ", icon = ":material/description:", default= True)
 
 # Navigation
 pg = st.navigation([lab1, lab2, lab3, lab4, lab5])

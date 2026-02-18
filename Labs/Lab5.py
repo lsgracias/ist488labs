@@ -75,9 +75,8 @@ tools = [
 def get_weather_advice(user_input: str) -> str:
     system_msg = (
         "You are a helpful weather-based fashion and activity advisor. "
-        "When given weather data, provide friendly, specific suggestions for "
-        "appropriate clothing to wear today and outdoor activities suited to "
-        "the current conditions. If no city is mentioned, use Syracuse, NY, US."
+        "When given weather data, provide friendly, specific suggestions for appropriate clothing to wear today and outdoor activities suited to the current conditions."
+        "If no city is mentioned, ask for them to provide a city."
     )
 
     messages = [
@@ -146,13 +145,3 @@ if st.button("Get Advice 👗"):
             st.write(advice)
         except Exception as e:
             st.error(f"Something went wrong: {e}")
-
-# Part A test (hidden behind expander)
-with st.expander("🔧 Test weather function directly (Part A)"):
-    test_city = st.text_input("Test city:", value="Syracuse, NY, US", key="test_city")
-    if st.button("Fetch Raw Weather"):
-        try:
-            data = get_current_weather(test_city)
-            st.json(data)
-        except Exception as e:
-            st.error(str(e))
