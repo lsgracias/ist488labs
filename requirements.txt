@@ -3,5 +3,4 @@ openai
 PyPDF2
 chromadb
 pysqlite3-binary
-requests
 json
