@@ -5,10 +5,12 @@ lab1 = st.Page("Labs/Lab1.py", title= "Lab 1 - Document Q & A", icon = ":materia
 lab2 = st.Page("Labs/Lab2.py", title= "Lab 2 - Document Summarizer", icon = ":material/description:")
 lab3 = st.Page("Labs/Lab3.py", title= "Lab 3 - Chatbot", icon = ":material/description:")
 lab4 = st.Page("Labs/Lab4.py", title= "Lab 4 - RAG Chatbot", icon = ":material/description:")
-lab5 = st.Page("Labs/Lab5.py", title= "Lab 5 - Fashion Bot ", icon = ":material/description:", default= True)
+lab5 = st.Page("Labs/Lab5.py", title= "Lab 5 - Fashion Bot ", icon = ":material/description:")
+lab6a = st.Page("Labs/Lab6a.py", title = "Lab 6a - OpenAI Responses API Agent", icon = ":material/description:")
+lab6b = st.Page("Labs/Lab6b.py", title = "Lab 6b - ", icon = ":material/description:")
 
 # Navigation
-pg = st.navigation([lab1, lab2, lab3, lab4, lab5])
+pg = st.navigation([lab1, lab2, lab3, lab4, lab5, lab6a, lab6b])
 
 # Configuration
 st.set_page_config(page_title="IST 488 Labs", page_icon=":material/school:")
