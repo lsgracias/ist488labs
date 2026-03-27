@@ -6,13 +6,20 @@ from langchain_core.output_parsers import StrOutputParser
 # Page config
 st.set_page_config(page_title="Movie Recommender", layout="wide")
 st.title("Lab 6b - Movie Recommendation Chatbot")
-st.caption("Powered by LangChain · GPT-4o Mini")
+st.caption("Powered by LangChain & GPT-4o Mini. Select your genre, mood and the persona you have when watching.")
 
 # LLM init (Part A) 
 llm = ChatOpenAI(
     model="gpt-4o-mini",
     api_key=st.secrets["OPENAI_API_KEY"],
 )
+
+# Part D
+# from langchain_anthropic import ChatAnthropic
+# llm = ChatAnthropic(
+#     model="claude-haiku-4-5-20251001",
+#     api_key=st.secrets["ANTHROPIC_API_KEY"],
+# )
 
 #  Session state 
 if "last_recommendation" not in st.session_state:

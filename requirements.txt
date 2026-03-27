@@ -6,4 +6,5 @@ pysqlite3-binary
 pydantic
 langchain
 langchain-openai
+langchain-anthropic
 langchain-core
