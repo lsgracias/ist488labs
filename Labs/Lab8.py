@@ -26,7 +26,7 @@ PROMPT = (
 
 
 # Header
-st.title("🖼️ Image Captioning Bot")
+st.title("Image Captioning Bot")
 st.write(
     "Provide the bot with either an image URL or file upload "
     "and let it write your captions for you!"
@@ -35,7 +35,7 @@ st.write(
 st.divider()
 
 # Part A – Image URL Input
-st.header("📎 Image URL Input")
+st.header("Image URL Input")
 st.write("Input your image URL here")
 
 url = st.text_input(
@@ -76,7 +76,7 @@ st.divider()
 
 # Part B – File Upload
 
-st.header("📤 Image Upload Input")
+st.header("Image Upload Input")
 st.write("Upload your image here")
 
 uploaded = st.file_uploader(
